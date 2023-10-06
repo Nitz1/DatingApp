@@ -10,6 +10,7 @@
   },
   "profiles": {
     "http": {
+      "hotReloadEnabled": false,
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
@@ -20,6 +21,7 @@
       }
     },
     "https": {
+      "hotReloadEnabled": false,
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
