@@ -1,4 +1,5 @@
-﻿using API.Data;
+﻿using System.Reflection;
+using API.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace API;
@@ -16,6 +17,8 @@ public static class ApplicationServiceExtension
             });
         services.AddCors();
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         return services;
    }
 }
