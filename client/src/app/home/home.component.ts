@@ -13,22 +13,22 @@ users: any;
       
     }
     ngOnInit(): void {
-      this.getUsers()
+      //this.getUsers()
     }
     register()
     {
       this.registerMode = !this.registerMode;
     }
 
-    getUsers(){
-      this.http.get('https://localhost:5001/api/users').subscribe({
-        next: response => {
-          this.users = response
-        },
-        error : e => console.log(e),
-        complete : () => console.log('Request has been completed')
-      })
-    }
+    // getUsers(){
+    //   this.http.get('https://localhost:5001/api/users').subscribe({
+    //     next: response => {
+    //       this.users = response
+    //     },
+    //     error : e => console.log(e),
+    //     complete : () => console.log('Request has been completed')
+    //   })
+    // }
 
     cancelRegisterMode(event: boolean){
       this.registerMode=event;
