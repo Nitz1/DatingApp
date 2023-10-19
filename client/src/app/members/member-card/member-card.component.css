@@ -15,6 +15,7 @@ transition-timing-function: ease-out;
 .card-img-wrapper{
     overflow: hidden;
     position:relative;
+    max-height:8rem;
 }
 
 .member-icons{

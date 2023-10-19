@@ -9,7 +9,6 @@ export class BusyService {
   constructor(private spinnerService: NgxSpinnerService) { }
 
   busy(){
-    debugger;
     this.busyRequestCount++;
     try{
       this.spinnerService.show(undefined, {
@@ -19,7 +18,6 @@ export class BusyService {
       });
     }
     catch(e){
-      debugger;
       console.log(e);
     }
   

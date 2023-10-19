@@ -23,7 +23,6 @@ export class MemberService {
   }
 
   getMember(username: string){
-    debugger;
     //if(this.members.length>0) return this.members.find(x=>x.userName==username);
     const member = this.members.find(x=>x.userName==username);
     if(member) return of(member);
