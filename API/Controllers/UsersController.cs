@@ -43,12 +43,21 @@ public class UsersController : BaseApiController
     // }
 
       [HttpGet]
-    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery] UserParams userParams)
     {
+      var user= await _repository.GetUserByUserNameAsync(User.GetUsername());
+          if(string.IsNullOrEmpty(userParams.Gender)){
+            userParams.Gender = user.Gender=="male"? "female" : "male";
+          }
+          
+          userParams.CurrentUsername = user.UserName;
+      var users = await _repository.GetMembersAsync(userParams);
+      Response.AddPaginationHeader(new PaginationHeader(userParams.PageNumber,
+          userParams.PageSize,users.TotalCount,users.TotalPages));
         //var users = await _repository.GetUsersAsync();
         //var usersToReturn = _mapper.Map<IEnumerable<MemberDto>>(users);
         //return Ok(usersToReturn);
-        return Ok(await _repository.GetMembersAsync());
+        return Ok(users);
     }
 
       [HttpGet("{username}")]

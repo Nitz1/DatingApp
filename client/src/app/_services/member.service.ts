@@ -1,8 +1,12 @@
-import { HttpClient, HttpHandler, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHandler, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { Member } from '../_models/member';
-import { Observable, map, of } from 'rxjs';
+import { Observable, map, of, take } from 'rxjs';
+import { PaginationResult } from '../_models/pagination';
+import { UserParams } from '../_models/userParams';
+import { AccountService } from './account.service';
+import { User } from '../_models/User';
 
 @Injectable({
   providedIn: 'root'
@@ -10,22 +14,92 @@ import { Observable, map, of } from 'rxjs';
 export class MemberService {
   baseUrl = environment.apiUrl; 
   members: Member[] = [];
-  constructor(private http: HttpClient) { }
+  userParams: UserParams | undefined ;
+  user: User | undefined;
+  memberCache = new Map();
+  constructor(private http: HttpClient, private accountService: AccountService) {
+    accountService.currentUser$.pipe(take(1)).subscribe({
+      next: user => {
+        if(user){
+          this.userParams = new UserParams(user);
+          this.user = user;
+        }
+      }
+    });
+   }
 
-  getMembers(){
-    if(this.members.length>0) return of(this.members);
+   getParams(){
+    return this.userParams;
+   }
 
-      return this.http.get<Member[]>(this.baseUrl + 'users').pipe(
-        map(members=>{
-          this.members = members;
-          return this.members;
-        }));
+   setParams(userParams: UserParams){
+    this.userParams = userParams;
+   }
+
+   resetUserParams(){
+    if(this.user){
+      this.userParams = new UserParams(this.user);
+      return this.userParams;
+    }
+    return;
+   }
+
+  getMembers<T>(userParams: UserParams){ //Member[]
+    const response = this.memberCache.get(Object.values(userParams).join('-'));
+    if(response) return of(response);
+    let params: HttpParams = this.getPaginationHeaders(userParams.pageNumber,userParams.pageSize);
+      params = params.append("minAge", userParams.minAge);
+      params = params.append("maxAge", userParams.maxAge);
+      params = params.append("gender", userParams.gender);
+      params = params.append("orderBy", userParams.orderBy);
+    return this.getPaginationResult<Member[]>(this.baseUrl + 'users', params).pipe(
+      map(response => {
+        this.memberCache.set(Object.values(userParams).join('-'), response);
+        return response;
+      })
+    );
+    //if(this.members.length>0) return of(this.members);
+
+      // return this.http.get<Member[]>(this.baseUrl + 'users').pipe(
+      //   map(members=>{
+      //     this.members = members;
+      //     return this.members;
+      //   }));
+
+    
+  }
+
+  private getPaginationHeaders(pageNumber: number, pageSize: number) {
+    let params: HttpParams = new HttpParams();
+      params = params.append("pageNumber", pageNumber);
+      params = params.append("pageSize", pageSize);
+    
+      return params;
+  }
+
+  private getPaginationResult<T>(url: string, params: HttpParams) {
+    const paginationResult: PaginationResult<T> = new PaginationResult<T>;
+    return this.http.get<T>(url, { observe: 'response', params }).pipe(
+      map(response => {
+        if (response.body) {
+          paginationResult.result = response.body;
+        }
+        const pagination = response.headers.get('Pagination');
+        if (pagination) {
+          paginationResult.pagination = JSON.parse(pagination);
+        }
+        return paginationResult;
+      }));
   }
 
   getMember(username: string){
-    //if(this.members.length>0) return this.members.find(x=>x.userName==username);
-    const member = this.members.find(x=>x.userName==username);
-    if(member) return of(member);
+    //if(this.members.length>0) return this.members.find(x=>x.userName==username);   
+    const member = [...this.memberCache.values()].
+    reduce((arr,elem) => arr.concat(elem.result),[])
+    .find((member: Member) => member.userName === username);
+
+    //const member = this.members.find(x=>x.userName==username);
+    if(member) return of(member); 
 
     return this.http.get<Member> (this.baseUrl + 'users/' + username);
   }
