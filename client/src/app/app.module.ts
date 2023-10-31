@@ -27,6 +27,8 @@ import { DatePickerComponent } from './_forms/date-picker/date-picker.component'
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { PaginationModule } from 'ngx-bootstrap/pagination';
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
+import { SampleComponent } from './sample/sample.component';
+import { MemberMessagesComponent } from './members/member-messages/member-messages.component';
 
 @NgModule({
   declarations: [
@@ -45,7 +47,9 @@ import { ButtonsModule } from 'ngx-bootstrap/buttons';
     MemberEditComponent,
     PhotoEditorComponent,
     TextInputComponent,
-    DatePickerComponent
+    DatePickerComponent,
+    SampleComponent //,
+    //MemberMessagesComponent
   ],
   imports: [
     BrowserModule,

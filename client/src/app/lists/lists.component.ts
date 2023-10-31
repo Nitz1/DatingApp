@@ -24,11 +24,10 @@ export class ListsComponent implements OnInit {
   loadLikes(){
     this.memberService.getLikes(this.predicate,this.pageNumber,this.pageSize).subscribe({
       next: response => {
-          debugger;
             this.members = response.result;
             if(!response.result?.length) {
               this.pagination = undefined;
-              return;
+              return; 
             }
             this.pagination = response.pagination;
       }
@@ -41,6 +40,5 @@ export class ListsComponent implements OnInit {
       //this.memberService.setParams(this.userParams);  
       this.loadLikes();
     }
-   
   }
 }
