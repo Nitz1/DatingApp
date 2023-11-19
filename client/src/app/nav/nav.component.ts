@@ -35,6 +35,7 @@ model: any = {};
         //console.log(response);
         this.router.navigateByUrl('/members');
         this.toaster.success('Login successful');
+        this.model = {};
         //this.loggedIn = true;
       },
       error: error =>{

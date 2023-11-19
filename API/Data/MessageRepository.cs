@@ -62,16 +62,27 @@ public class MessageRepository : IMessageRepository
 
     public async Task<IEnumerable<MessageDto>> GetMesageThread(string currentUserName, string recipientUserName)
     {
-       var messages =await _context.Messages.Include(x=>x.Sender).
-                  ThenInclude(x=>x.Photos).Include(x=>x.Recepient).
-                  ThenInclude(x=>x.Photos).Where(x=>
+    //    var messages =await _context.Messages.Include(x=>x.Sender).
+    //               ThenInclude(x=>x.Photos).Include(x=>x.Recepient).
+    //               ThenInclude(x=>x.Photos).Where(x=>
+    //                      x.RecepientUsername== currentUserName && 
+    //                      x.SenderUsername == recipientUserName && x.RecepientDeleted == false
+    //                  ||  x.SenderUsername == currentUserName && 
+    //                  x.RecepientUsername == recipientUserName && x.SenderDeleted == false
+    //               ).OrderByDescending(x=>x.MessageSent).ToListAsync();
+
+          var query = _context.Messages.
+                    Where(x=>
                          x.RecepientUsername== currentUserName && 
                          x.SenderUsername == recipientUserName && x.RecepientDeleted == false
                      ||  x.SenderUsername == currentUserName && 
                      x.RecepientUsername == recipientUserName && x.SenderDeleted == false
-                  ).OrderByDescending(x=>x.MessageSent).ToListAsync();
+                  ).OrderByDescending(x=>x.MessageSent).AsQueryable();
 
-        var unreadMessages = messages.Where(x=>x.DateRead==null && x.RecepientUsername==currentUserName)
+        // var unreadMessages = messages.Where(x=>x.DateRead==null && x.RecepientUsername==currentUserName)
+        //                      .ToList();
+        
+        var unreadMessages = query.Where(x=>x.DateRead==null && x.RecepientUsername==currentUserName)
                              .ToList();
         
         if(unreadMessages.Any())
@@ -80,10 +91,12 @@ public class MessageRepository : IMessageRepository
             {
                 message.DateRead = DateTime.UtcNow;
             }
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
         }
 
-       return _mapper.Map<IEnumerable<MessageDto>>(messages);
+       //return _mapper.Map<IEnumerable<MessageDto>>(messages);
+
+       return await query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider).ToListAsync();
     }
 
     public async Task<Message> GetMessage(int id)
@@ -102,10 +115,10 @@ public class MessageRepository : IMessageRepository
         _context.Connections.Remove(connection);
     }
 
-    public async Task<bool> SaveAllAsync()
-    {
-        return await _context.SaveChangesAsync()>0;
-    }
+    // public async Task<bool> SaveAllAsync()
+    // {
+    //     return await _context.SaveChangesAsync()>0;
+    // }
 
     void IMessageRepository.AddGroup(Group group)
     {
